@@ -1,4 +1,6 @@
 import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.LinkedList;
 
 public interface Logic extends Remote {
 
@@ -11,7 +13,7 @@ public interface Logic extends Remote {
      * 0 - something went wrong
      */
 
-    Object sendMessage(String getterName, String message);
+    Object sendMessage(String senderName, String getterName, String message) throws RemoteException;
 
     /**
      * Sends new messages to requester
@@ -20,6 +22,6 @@ public interface Logic extends Remote {
      * @return - LinkedList {@link java.util.LinkedList} of new messages for requester
      */
 
-    Object getMessage(String requester);
+    LinkedList getMessage(String requester) throws RemoteException;
 
 }
