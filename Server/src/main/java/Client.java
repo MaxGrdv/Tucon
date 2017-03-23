@@ -9,11 +9,14 @@ public class Client {
     private static String username = "";
     private static String usernameGetter = "";
 
+    private static Registry registry;
+    private static Logic server;
+
     public static void main(String args[]) throws Exception {
 
-        Registry registry = LocateRegistry.getRegistry("localhost", 7777);
+        registry = LocateRegistry.getRegistry("localhost", 7777);
 
-        Logic server = (Logic) registry.lookup("Tucon");
+        server = (Logic) registry.lookup("Tucon");
 
         Scanner sc = new Scanner(System.in);
 
@@ -23,41 +26,66 @@ public class Client {
         System.out.print("Enter getter username: ");
         usernameGetter = sc.nextLine();
 
-        while (true) {
+        Thread getMessages = new Thread(new Runnable() {
+            public void run() {
 
-            LinkedList<Info> newMessages = new LinkedList<Info>();
+                LinkedList<Info> newMessages = new LinkedList<Info>();
 
-            System.out.print(">> ");
-            String message = sc.nextLine();
+                while (true) {
 
-            try {
+                    try {
 
-                server.sendMessage(username, usernameGetter, message);
+                        newMessages = (LinkedList) server.getMessage(username);
 
-            } catch (RemoteException e) {
+                    } catch (Exception e) {
 
-                System.out.println(e.getMessage());
+                        System.out.println(e.getMessage());
 
-            }
+                    }
 
-            try {
+                    for (Info each : newMessages) {
 
-                newMessages = (LinkedList) server.getMessage(username);
+                        System.out.println(each.sender + ": " + each.message);
 
-            } catch (Exception e) {
+                    }
 
-                System.out.println(e.getMessage());
+                    newMessages.clear();
 
-            }
-
-            for (Info each : newMessages) {
-
-                System.out.println(each.sender + ": " + each.message);
+                }
 
             }
+        });
 
-        }
+        Thread sendMessages = new Thread(new Runnable() {
+
+            public void run() {
+
+                Scanner sc = new Scanner(System.in);
+
+                while (true) {
+
+                    System.out.print(">> ");
+                    String message = sc.nextLine();
+
+                    try {
+
+                        server.sendMessage(username, usernameGetter, message);
+
+                    } catch (RemoteException e) {
+
+                        System.out.println(e.getMessage());
+
+                    }
+
+                }
+            }
+
+        });
+
+        sendMessages.start();
+        getMessages.start();
 
     }
+
 
 }
