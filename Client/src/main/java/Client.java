@@ -9,12 +9,11 @@ public class Client {
     private static String username = "";
     private static String usernameGetter = "";
 
-    private static Registry registry;
     private static Logic server;
 
     public static void main(String args[]) throws Exception {
 
-        registry = LocateRegistry.getRegistry("localhost", 7777);
+        Registry registry = LocateRegistry.getRegistry("localhost", 7777);
 
         server = (Logic) registry.lookup("Tucon");
 
@@ -27,6 +26,7 @@ public class Client {
         usernameGetter = sc.nextLine();
 
         Thread getMessages = new Thread(new Runnable() {
+
             public void run() {
 
                 LinkedList<Info> newMessages = new LinkedList<Info>();
