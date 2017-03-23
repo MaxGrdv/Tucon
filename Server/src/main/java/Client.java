@@ -7,6 +7,7 @@ import java.util.Scanner;
 public class Client {
 
     private static String username = "";
+    private static String usernameGetter = "";
 
     public static void main(String args[]) throws Exception {
 
@@ -19,6 +20,9 @@ public class Client {
         System.out.print("Enter your username: ");
         username = sc.nextLine();
 
+        System.out.print("Enter getter username: ");
+        usernameGetter = sc.nextLine();
+
         while (true) {
 
             LinkedList<Info> newMessages = new LinkedList<Info>();
@@ -28,7 +32,7 @@ public class Client {
 
             try {
 
-                server.sendMessage(username, "DctWAT", message);
+                server.sendMessage(username, usernameGetter, message);
 
             } catch (RemoteException e) {
 
@@ -38,7 +42,7 @@ public class Client {
 
             try {
 
-                newMessages = (LinkedList) server.getMessage("DctWAT");
+                newMessages = (LinkedList) server.getMessage(username);
 
             } catch (Exception e) {
 
