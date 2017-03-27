@@ -1,7 +1,13 @@
+package model;
+
+import server.Info;
+import server.Logic;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.LinkedList;
+
 
 public class Client {
 
@@ -32,7 +38,7 @@ public class Client {
 
         try {
 
-            newMessages = (LinkedList) server.getMessage(username);
+            newMessages.addAll(server.getMessage(username));
 
         } catch (Exception e) {
 

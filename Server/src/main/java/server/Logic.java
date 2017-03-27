@@ -1,3 +1,5 @@
+package server;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.LinkedList;
@@ -19,7 +21,7 @@ public interface Logic extends Remote {
      * Sends new messages to requester
      *
      * @param requester - who request new messages
-     * @return - LinkedList {@link LinkedList} of new messages for requester
+     * @return - LinkedList {@link java.util.LinkedList} of new messages for requester
      */
 
     LinkedList getMessage(String requester) throws RemoteException;
