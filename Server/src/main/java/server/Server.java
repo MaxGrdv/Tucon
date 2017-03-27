@@ -68,7 +68,7 @@ public class Server implements Logic {
     public static void main(String args[]) throws Exception {
 
         // Create something like registration form
-        Registry registry = LocateRegistry.createRegistry(9090);
+        Registry registry = LocateRegistry.createRegistry(7777);
 
         // Create new object for server
         final Logic server = new Server();
