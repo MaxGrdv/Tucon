@@ -17,7 +17,7 @@ public class Client {
 
     public Client(String username) throws Exception {
 
-        Registry registry = LocateRegistry.getRegistry("localhost", 7777);
+        Registry registry = LocateRegistry.getRegistry("95.37.168.220", 9090);
 
         server = (Logic) registry.lookup("Tucon");
 
