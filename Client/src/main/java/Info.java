@@ -1,9 +1,13 @@
 import java.io.Serializable;
 
+/**
+ * This class is used to send messages from client to server
+ */
+
 public class Info implements Serializable {
 
-    public String sender;
-    public String message;
+    private String sender;
+    private String message;
 
     public Info(String sender, String message) {
         this.sender = sender;
