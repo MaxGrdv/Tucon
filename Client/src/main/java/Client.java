@@ -2,90 +2,72 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.LinkedList;
-import java.util.Scanner;
 
 public class Client {
 
-    private static String username = "";
-    private static String usernameGetter = "";
+    private String username = "";
 
-    private static Logic server;
+    private Logic server;
 
-    public static void main(String args[]) throws Exception {
+    public Client(String username) throws Exception {
 
         Registry registry = LocateRegistry.getRegistry("localhost", 7777);
 
         server = (Logic) registry.lookup("Tucon");
 
-        Scanner sc = new Scanner(System.in);
-
-        System.out.print("Enter your username: ");
-        username = sc.nextLine();
-
-        System.out.print("Enter getter username: ");
-        usernameGetter = sc.nextLine();
-
-        Thread getMessages = new Thread(new Runnable() {
-
-            public void run() {
-
-                LinkedList<Info> newMessages = new LinkedList<Info>();
-
-                while (true) {
-
-                    try {
-
-                        newMessages = (LinkedList) server.getMessage(username);
-
-                    } catch (Exception e) {
-
-                        System.out.println(e.getMessage());
-
-                    }
-
-                    for (Info each : newMessages) {
-
-                        System.out.println(each.sender + ": " + each.message);
-
-                    }
-
-                    newMessages.clear();
-
-                }
-
-            }
-        });
-
-        Thread sendMessages = new Thread(new Runnable() {
-
-            public void run() {
-
-                Scanner sc = new Scanner(System.in);
-
-                while (true) {
-
-                    System.out.print(">> ");
-                    String message = sc.nextLine();
-
-                    try {
-
-                        server.sendMessage(username, usernameGetter, message);
-
-                    } catch (RemoteException e) {
-
-                        System.out.println(e.getMessage());
-
-                    }
-
-                }
-            }
-
-        });
-
-        sendMessages.start();
-        getMessages.start();
+        this.username = username;
 
     }
 
+    /**
+     * Gets new messages for the client
+     *
+     * @return LinkedList {@link LinkedList<Info>} contains new messages
+     */
+
+    public LinkedList<Info> getMessages() {
+
+        LinkedList<Info> newMessages = new LinkedList<Info>();
+
+
+        try {
+
+            newMessages = (LinkedList) server.getMessage(username);
+
+        } catch (Exception e) {
+
+            System.out.println(e.getMessage());
+            return null;
+
+        }
+
+        return newMessages;
+
+
+    }
+
+    /**
+     * Sends new message to getter
+     *
+     * @param usernameGetter username of getter
+     * @param message        new message
+     * @return 1 - successful
+     * 0 - unsuccessful
+     */
+
+    public int sendMessage(String usernameGetter, String message) {
+
+        try {
+
+            server.sendMessage(username, usernameGetter, message);
+            return 1;
+
+        } catch (RemoteException e) {
+
+            System.out.println(e.getMessage());
+            return 0;
+        }
+
+    }
 
 }
