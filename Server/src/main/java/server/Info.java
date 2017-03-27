@@ -1,3 +1,5 @@
+package server;
+
 import java.io.Serializable;
 
 /**
@@ -9,7 +11,7 @@ public class Info implements Serializable {
     private String sender;
     private String message;
 
-    public Info(String sender, String message) {
+    Info(String sender, String message) {
         this.sender = sender;
         this.message = message;
     }
