@@ -25,6 +25,10 @@ public class Client {
 
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     /**
      * Gets new messages for the client
      *
