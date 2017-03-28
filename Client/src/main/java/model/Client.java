@@ -3,6 +3,7 @@ package model;
 import server.Info;
 import server.Logic;
 
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -14,12 +15,34 @@ public class Client {
     private String username = "";
 
     private Logic server;
+    private Registry registry;
 
-    public Client(String username) throws Exception {
+    public Client(String username) {
 
-        Registry registry = LocateRegistry.getRegistry("localhost", 7777);
+        try {
+            registry = LocateRegistry.getRegistry("95.37.168.128", 7777);
+        } catch (RemoteException e) {
 
-        server = (Logic) registry.lookup("Tucon");
+            System.out.println(e.getMessage());
+            return;
+
+        }
+        try {
+
+            try {
+                server = (Logic) registry.lookup("Tucon");
+            } catch (NotBoundException e) {
+
+                System.out.println(e.getMessage());
+                return;
+
+            }
+        } catch (RemoteException e) {
+
+            System.out.println(e.getMessage());
+            return;
+
+        }
 
         this.username = username;
 
