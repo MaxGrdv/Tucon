@@ -1,2 +1,2 @@
 # Tucon
-New messanger from Russian student
+New messanger from Russian students
