@@ -89,7 +89,7 @@ public class Database {
     }
 
     /**
-     * Closes every connection to databases
+     * Closes both connections to databases
      *
      * @return 0 - if unsuccessful
      * 1 - if successful
