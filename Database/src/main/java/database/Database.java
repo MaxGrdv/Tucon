@@ -1,8 +1,6 @@
 package database;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import java.sql.*;
 
 public class Database {
 
@@ -21,33 +19,36 @@ public class Database {
 
         final String driverName = "org.sqlite.JDBC";
 
-        final String usersConnectionString = "jdbc:sqlite:users.db";
-        final String messagesConnectionString = "jdbc:sqlite:messages.db";
+        final String usersConnectionString = "jdbc:sqlite:C:\\Users\\gigel\\IdeaProjects\\Tucon\\Database\\db\\users.db";
+        final String messagesConnectionString = "jdbc:sqlite:C:\\Users\\gigel\\IdeaProjects\\Tucon\\Database\\db\\messages.db";
 
         try {
             Class.forName(driverName);
         } catch (Exception e) {
             System.out.println("No driver found.");
+            System.out.println(e.getMessage());
         }
 
         try {
             usersDatabase = DriverManager.getConnection(usersConnectionString);
         } catch (Exception e) {
             System.out.println("Can't get connection to [usersDatabase].");
+            System.out.println(e.getMessage());
         }
 
         try {
             messagesDatabase = DriverManager.getConnection(messagesConnectionString);
         } catch (Exception e) {
             System.out.println("Can't get connection to [messagesDatabase].");
+            System.out.println(e.getMessage());
         }
 
         try {
 
             String sqlRequest = "CREATE TABLE IF NOT EXISTS users(\n"
-                    + "id integer PRIMARY KEY, \n"
-                    + "name text NOT NULL, \n"
-                    + "password text NOT NULL\n"
+                    + "id INTEGER PRIMARY KEY, \n"
+                    + "name TEXT NOT NULL, \n"
+                    + "password TEXT NOT NULL\n"
                     + ");";
 
             Statement statement = usersDatabase.createStatement();
@@ -60,8 +61,8 @@ public class Database {
         try {
 
             String sqlRequest = "CREATE TABLE IF NOT EXISTS messages(\n"
-                    + "id integer PRIMARY KEY, \n"
-                    + "messages text NOT NULL\n"
+                    + "id INTEGER PRIMARY KEY, \n"
+                    + "messages TEXT NOT NULL\n"
                     + ");";
 
             Statement statement = messagesDatabase.createStatement();
@@ -110,7 +111,20 @@ public class Database {
 
         String sqlRequest = "INSERT INTO users(name, password) VALUES(?,?)";
 
-        // TODO
+        try {
+
+            PreparedStatement statement = usersDatabase.prepareStatement(sqlRequest);
+
+            statement.setString(1, username);
+            statement.setString(2, password);
+
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("Error while adding new user to table [users]");
+            System.out.println(e.getMessage());
+            return 0;
+        }
 
         return 1;
 

@@ -27,4 +27,15 @@ public class DatabaseTests {
 
     }
 
+    @Test
+    public void testAdding() {
+
+        Database db = Database.getInstance();
+
+        int res = db.addNewUser("gigel773", "12345");
+
+        assertEquals(1, res);
+
+    }
+
 }
