@@ -69,7 +69,7 @@ public class DatabaseTests {
     }
 
     @Test
-    public void testCheckingTrue() {
+    public void testChecking() {
 
         int res = db.checkTables();
 

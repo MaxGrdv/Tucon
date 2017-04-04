@@ -91,7 +91,7 @@ public class Database {
      * @param password password of new user
      * @return 0 - if unsuccessful
      * 1 - if successful
-     * 2 - if user is already in database
+     * 2 - if username is already in database
      */
 
     public int addNewUser(String username, String password) {
