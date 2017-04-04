@@ -75,4 +75,13 @@ public class DatabaseTests {
         assertEquals(1, res);
 
     }
+
+    @Test
+    public void testNewMessage() {
+
+        int res = db.addNewMessage("5df", 12345, "somebody", "hello");
+
+        assertEquals(1, res);
+
+    }
 }

@@ -119,6 +119,40 @@ public class Database {
     }
 
     /**
+     * Adds new message to special history
+     *
+     * @param key     - unique identifier for history
+     * @param message - new message
+     * @return 0 - if unsuccessful
+     * 1 - if successful
+     */
+
+    public int addNewMessage(String key, int time, String sender, String message) {
+
+        String sqlRequest = "INSERT INTO messages(uKey, time, sender, message) VALUES(?,?,?,?)";
+
+        try {
+
+            PreparedStatement statement = messagesDatabase.prepareStatement(sqlRequest);
+
+            statement.setString(1, key);
+            statement.setInt(2, time);
+            statement.setString(3, sender);
+            statement.setString(4, message);
+
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("Failed to add new message.");
+            System.out.println(e.getMessage());
+
+            return 0;
+        }
+
+        return 1;
+    }
+
+    /**
      * Closes both connections to databases
      *
      * @return 0 - if unsuccessful
@@ -291,7 +325,10 @@ public class Database {
 
             String sqlRequest = "CREATE TABLE IF NOT EXISTS messages(\n"
                     + "id INTEGER PRIMARY KEY, \n"
-                    + "messages TEXT NOT NULL\n"
+                    + "uKey TEXT NOT NULL, \n"
+                    + "time INTEGER, \n"
+                    + "sender TEXT NOT NULL, \n"
+                    + "message TEXT NOT NULL\n"
                     + ");";
 
             Statement statement = messagesDatabase.createStatement();
