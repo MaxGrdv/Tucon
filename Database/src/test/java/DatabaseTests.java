@@ -5,6 +5,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * IMPORTANT: delete all databases for correct tests results
+ */
+
 public class DatabaseTests {
 
     private Database db = Database.getInstance();
@@ -24,16 +28,27 @@ public class DatabaseTests {
     }
 
     @Test
-    public void testAuthorization() {
+    public void testAuthorizationTrue() {
 
-        int res = db.authorizeUser("gigel773", "12345");
+        db.addNewUser("someone", "something");
+
+        int res = db.authorizeUser("someone", "something");
 
         assertEquals(1, res);
 
     }
 
     @Test
-    public void testAdding() {
+    public void testAuthorizationFalse() {
+
+        int res = db.authorizeUser("anyone", "some");
+
+        assertEquals(0, res);
+
+    }
+
+    @Test
+    public void testAddingTrue() {
 
         int res = db.addNewUser("gigel773", "12345");
 
@@ -42,7 +57,18 @@ public class DatabaseTests {
     }
 
     @Test
-    public void testChecking() {
+    public void testAddingFalse() {
+
+        db.addNewUser("gigel", "12345");
+
+        int res = db.addNewUser("gigel", "12345");
+
+        assertEquals(2, res);
+
+    }
+
+    @Test
+    public void testCheckingTrue() {
 
         int res = db.checkTables();
 
