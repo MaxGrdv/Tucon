@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * IMPORTANT: delete all databases for correct tests results
@@ -82,6 +83,17 @@ public class DatabaseTests {
         int res = db.addNewMessage("5df", 12345, "somebody", "hello");
 
         assertEquals(1, res);
+
+    }
+
+    @Test
+    public void testGetMessages() {
+
+        db.addNewMessage("o8i", (int) (System.currentTimeMillis() / 1000L), "gigel", "hello");
+
+        Object res = db.getMessages("o8i", 86400);
+
+        assertNotEquals(null, res);
 
     }
 }

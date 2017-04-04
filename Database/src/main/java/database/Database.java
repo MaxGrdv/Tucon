@@ -1,6 +1,10 @@
 package database;
 
+import server.Info;
+
 import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Database {
 
@@ -42,8 +46,8 @@ public class Database {
     /**
      * Authorizes user
      *
-     * @param username - nickname of user
-     * @param password - password of user
+     * @param username nickname of user
+     * @param password password of user
      * @return -1 - if something gone wrong
      * 0 - if there are no user with such username in database
      * 1 - if user is in database and his password is right
@@ -83,8 +87,8 @@ public class Database {
     /**
      * Insert pair [username, password] to table
      *
-     * @param username - nickname of new user
-     * @param password - password of new user
+     * @param username nickname of new user
+     * @param password password of new user
      * @return 0 - if unsuccessful
      * 1 - if successful
      * 2 - if user is already in database
@@ -121,8 +125,8 @@ public class Database {
     /**
      * Adds new message to special history
      *
-     * @param key     - unique identifier for history
-     * @param message - new message
+     * @param key     unique identifier for history
+     * @param message new message
      * @return 0 - if unsuccessful
      * 1 - if successful
      */
@@ -150,6 +154,48 @@ public class Database {
         }
 
         return 1;
+    }
+
+    /**
+     * Finds messages of special history on given period
+     *
+     * @param key    unique identifier for history
+     * @param period time period we want to get messages from
+     * @return {@link List} of requested messages
+     */
+
+    public List getMessages(String key, long period) {
+
+        long lowBoard = System.currentTimeMillis() / 1000L - period;
+
+        List<Info> messages = new LinkedList<Info>();
+
+        String sqlRequest = "SELECT uKey, time, sender, message FROM messages";
+
+        try {
+
+            Statement statement = messagesDatabase.createStatement();
+            ResultSet record = statement.executeQuery(sqlRequest);
+
+            while (record.next()) {
+
+                if (key.equals(record.getString("uKey"))) {
+                    if (lowBoard < record.getInt("time")) {
+                        messages.add(new Info(record.getString("sender"),
+                                record.getString("message")));
+                    }
+                }
+
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Failed to get messages");
+            System.out.println(e.getMessage());
+
+            return null;
+        }
+
+        return messages;
     }
 
     /**
