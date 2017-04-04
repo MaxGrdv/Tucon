@@ -3,9 +3,7 @@
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-core/2.7.19/mockito-core-2.7.19.jar!/" />
     </CLASSES>
-    <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-core/2.7.19/mockito-core-2.7.19-javadoc.jar!/" />
-    </JAVADOC>
+    <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-core/2.7.19/mockito-core-2.7.19-sources.jar!/" />
     </SOURCES>
