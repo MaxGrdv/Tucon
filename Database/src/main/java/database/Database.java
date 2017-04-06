@@ -131,7 +131,7 @@ public class Database {
      * 1 - if successful
      */
 
-    public int addNewMessage(String key, int time, String sender, String message) {
+    public int addNewMessage(String key, long time, String sender, String message) {
 
         String sqlRequest = "INSERT INTO messages(uKey, time, sender, message) VALUES(?,?,?,?)";
 
@@ -140,7 +140,7 @@ public class Database {
             PreparedStatement statement = messagesDatabase.prepareStatement(sqlRequest);
 
             statement.setString(1, key);
-            statement.setInt(2, time);
+            statement.setLong(2, time);
             statement.setString(3, sender);
             statement.setString(4, message);
 
@@ -279,7 +279,7 @@ public class Database {
 
     private int connectToUsersDatabase() {
 
-        final String usersConnectionString = "jdbc:sqlite:C:\\Users\\gigel\\IdeaProjects\\Tucon\\Database\\db\\users.db";
+        final String usersConnectionString = "jdbc:sqlite:C:\\Users\\gigel\\IdeaProjects\\Tucon\\Database\\users.db";
 
         try {
             usersDatabase = DriverManager.getConnection(usersConnectionString);
@@ -301,7 +301,7 @@ public class Database {
 
     private int connectToMessagesDatabase() {
 
-        final String messagesConnectionString = "jdbc:sqlite:C:\\Users\\gigel\\IdeaProjects\\Tucon\\Database\\db\\messages.db";
+        final String messagesConnectionString = "jdbc:sqlite:C:\\Users\\gigel\\IdeaProjects\\Tucon\\Database\\messages.db";
 
         try {
             messagesDatabase = DriverManager.getConnection(messagesConnectionString);
