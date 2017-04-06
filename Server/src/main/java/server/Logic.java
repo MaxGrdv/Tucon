@@ -24,6 +24,6 @@ public interface Logic extends Remote {
      * @return - LinkedList {@link java.util.LinkedList} of new messages for requester
      */
 
-    LinkedList getMessage(String requester) throws RemoteException;
+    LinkedList<Info> getMessage(String requester) throws RemoteException;
 
 }

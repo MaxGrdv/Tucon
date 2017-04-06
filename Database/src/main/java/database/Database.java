@@ -5,11 +5,14 @@ import server.Info;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Database {
 
     private Connection usersDatabase = null;
     private Connection messagesDatabase = null;
+    private Logger logger = Logger.getAnonymousLogger();
 
     /**
      * Constructor is passing two steps:
@@ -27,8 +30,7 @@ public class Database {
         try {
             Class.forName(driverName);
         } catch (Exception e) {
-            System.out.println("No driver found.");
-            System.out.println(e.getMessage());
+            logger.log(Level.ALL, "No driver found.", e);
         }
 
         start();
@@ -37,6 +39,9 @@ public class Database {
 
     private static class DatabaseHolder {
         private final static Database instance = new Database();
+
+        private DatabaseHolder() {
+        }
     }
 
     public static Database getInstance() {
@@ -58,10 +63,13 @@ public class Database {
 
         String sqlRequest = "SELECT name, password FROM users";
 
+        Statement statement = null;
+        ResultSet pair = null;
+
         try {
 
-            Statement statement = usersDatabase.createStatement();
-            ResultSet pair = statement.executeQuery(sqlRequest);
+            statement = usersDatabase.createStatement();
+            pair = statement.executeQuery(sqlRequest);
 
             while (pair.next()) {
                 if (username.equals(pair.getString("name"))) {
@@ -76,9 +84,27 @@ public class Database {
             }
 
         } catch (SQLException e) {
-            System.out.println("Failed to find user in database.");
-            System.out.println(e.getMessage());
+
+            logger.log(Level.ALL, "Failed to find user in database: ", e);
             return -1;
+
+        } finally {
+
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.ALL, "Failed to close statement: ", e);
+            }
+
+            try {
+                if (pair != null) {
+                    pair.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.ALL, "Failed to close result set: ", e);
+            }
         }
 
         return 0;
@@ -96,16 +122,17 @@ public class Database {
 
     public int addNewUser(String username, String password) {
 
-        if ((1 == authorizeUser(username, "1")) |
+        if ((1 == authorizeUser(username, "1")) ||
                 (2 == authorizeUser(username, "1"))) {
             return 2;
         }
 
         String sqlRequest = "INSERT INTO users(name, password) VALUES(?,?)";
+        PreparedStatement statement = null;
 
         try {
 
-            PreparedStatement statement = usersDatabase.prepareStatement(sqlRequest);
+            statement = usersDatabase.prepareStatement(sqlRequest);
 
             statement.setString(1, username);
             statement.setString(2, password);
@@ -113,9 +140,20 @@ public class Database {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            System.out.println("Error while adding new user to table [users]");
-            System.out.println(e.getMessage());
+
+            logger.log(Level.ALL, "Error while adding new user to table [users]", e);
             return 0;
+
+        } finally {
+            try {
+
+                if (statement != null) {
+                    statement.close();
+                }
+
+            } catch (SQLException e) {
+                logger.log(Level.ALL, "Failed to close prepared statement: ", e);
+            }
         }
 
         return 1;
@@ -134,10 +172,11 @@ public class Database {
     public int addNewMessage(String key, long time, String sender, String message) {
 
         String sqlRequest = "INSERT INTO messages(uKey, time, sender, message) VALUES(?,?,?,?)";
+        PreparedStatement statement = null;
 
         try {
 
-            PreparedStatement statement = messagesDatabase.prepareStatement(sqlRequest);
+            statement = messagesDatabase.prepareStatement(sqlRequest);
 
             statement.setString(1, key);
             statement.setLong(2, time);
@@ -147,10 +186,22 @@ public class Database {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            System.out.println("Failed to add new message.");
-            System.out.println(e.getMessage());
+            logger.log(Level.ALL, "Failed to add new message.", e);
 
             return 0;
+
+        } finally {
+
+            try {
+
+                if (statement != null) {
+                    statement.close();
+                }
+
+            } catch (SQLException e) {
+                logger.log(Level.ALL, "Failed to close prepared statement: ", e);
+            }
+
         }
 
         return 1;
@@ -172,27 +223,68 @@ public class Database {
 
         String sqlRequest = "SELECT uKey, time, sender, message FROM messages";
 
+        Statement statement = null;
+        ResultSet record = null;
+
         try {
 
-            Statement statement = messagesDatabase.createStatement();
-            ResultSet record = statement.executeQuery(sqlRequest);
+            statement = messagesDatabase.createStatement();
+            record = statement.executeQuery(sqlRequest);
 
             while (record.next()) {
 
-                if (key.equals(record.getString("uKey"))) {
-                    if (lowBoard < record.getInt("time")) {
-                        messages.add(new Info(record.getString("sender"),
-                                record.getString("message")));
-                    }
-                }
+                messages = putMessage(messages, key, record, lowBoard);
 
             }
 
         } catch (SQLException e) {
-            System.out.println("Failed to get messages");
-            System.out.println(e.getMessage());
+            logger.log(Level.ALL, "Failed to get messages", e);
+        } finally {
 
-            return null;
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.ALL, "Failed to close statement: ", e);
+            }
+
+            try {
+                if (record != null) {
+                    record.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.ALL, "Failed to close record: ", e);
+            }
+        }
+
+        return messages;
+    }
+
+    /**
+     * Puts new message to list which is containing all requested messages
+     *
+     * @param messages list of messages
+     * @param key      unique key of special history
+     * @param record   record in database
+     * @param lowBoard board of time
+     * @return list of messages with added new message
+     */
+
+    private List<Info> putMessage(List<Info> messages,
+                                  String key,
+                                  ResultSet record,
+                                  long lowBoard) {
+        try {
+            if ((key.equals(record.getString("uKey"))) &&
+                    (lowBoard < record.getInt("time"))) {
+
+                messages.add(new Info(record.getString("sender"),
+                        record.getString("message")));
+
+            }
+        } catch (Exception e) {
+            logger.log(Level.ALL, "Error while reading DB ", e);
         }
 
         return messages;
@@ -207,7 +299,7 @@ public class Database {
 
     public int stop() {
 
-        if ((1 == closeUsersDatabaseConnection()) &
+        if ((1 == closeUsersDatabaseConnection()) &&
                 (1 == closeMessagesDatabaseConnection())) {
 
             return 1;
@@ -228,8 +320,10 @@ public class Database {
         try {
             usersDatabase.close();
         } catch (Exception e) {
-            System.out.println("Can't close connection to [usersDatabase]");
+
+            logger.log(Level.ALL, "Can't close connection to [usersDatabase]", e);
             return 0;
+
         }
 
         return 1;
@@ -246,8 +340,10 @@ public class Database {
         try {
             messagesDatabase.close();
         } catch (Exception e) {
-            System.out.println("Can't close connection to [messagesDatabase]");
+
+            logger.log(Level.ALL, "Can't close connection to [messagesDatabase]", e);
             return 0;
+
         }
 
         return 1;
@@ -262,7 +358,7 @@ public class Database {
 
     public int start() {
 
-        if ((1 == connectToMessagesDatabase()) & (1 == connectToUsersDatabase())) {
+        if ((1 == connectToMessagesDatabase()) && (1 == connectToUsersDatabase())) {
             return 1;
         }
 
@@ -284,9 +380,10 @@ public class Database {
         try {
             usersDatabase = DriverManager.getConnection(usersConnectionString);
         } catch (Exception e) {
-            System.out.println("Can't get connection to [usersDatabase].");
-            System.out.println(e.getMessage());
+
+            logger.log(Level.ALL, "Can't get connection to [usersDatabase].", e);
             return 0;
+
         }
 
         return 1;
@@ -306,9 +403,10 @@ public class Database {
         try {
             messagesDatabase = DriverManager.getConnection(messagesConnectionString);
         } catch (Exception e) {
-            System.out.println("Can't get connection to [messagesDatabase].");
-            System.out.println(e.getMessage());
+
+            logger.log(Level.ALL, "Can't get connection to [messagesDatabase].", e);
             return 0;
+
         }
 
         return 1;
@@ -323,7 +421,7 @@ public class Database {
 
     public int checkTables() {
 
-        if ((1 == checkUsersTable()) & (1 == checkMessagesTable())) {
+        if ((1 == checkUsersTable()) && (1 == checkMessagesTable())) {
             return 1;
         }
 
@@ -339,6 +437,9 @@ public class Database {
      */
 
     private int checkUsersTable() {
+
+        Statement statement = null;
+
         try {
 
             String sqlRequest = "CREATE TABLE IF NOT EXISTS users(\n"
@@ -347,12 +448,25 @@ public class Database {
                     + "password TEXT NOT NULL\n"
                     + ");";
 
-            Statement statement = usersDatabase.createStatement();
+            statement = usersDatabase.createStatement();
             statement.execute(sqlRequest);
 
         } catch (Exception e) {
-            System.out.println("Error while checking [users] table in [usersDatabase]");
+
+            logger.log(Level.ALL, "Error while checking [users] table in [usersDatabase]", e);
             return 0;
+
+        } finally {
+
+            try {
+
+                if (statement != null) {
+                    statement.close();
+                }
+
+            } catch (SQLException e) {
+                logger.log(Level.ALL, "Failed to close statement ", e);
+            }
         }
 
         return 1;
@@ -367,6 +481,9 @@ public class Database {
      */
 
     private int checkMessagesTable() {
+
+        Statement statement = null;
+
         try {
 
             String sqlRequest = "CREATE TABLE IF NOT EXISTS messages(\n"
@@ -377,12 +494,25 @@ public class Database {
                     + "message TEXT NOT NULL\n"
                     + ");";
 
-            Statement statement = messagesDatabase.createStatement();
+            statement = messagesDatabase.createStatement();
             statement.execute(sqlRequest);
 
         } catch (Exception e) {
-            System.out.println("Error while checking [messages] table in [messagesDatabase]");
+
+            logger.log(Level.ALL, "Error while checking [messages] table in [messagesDatabase]", e);
             return 0;
+
+        } finally {
+
+            try {
+
+                if (statement != null) {
+                    statement.close();
+                }
+
+            } catch (SQLException e) {
+                logger.log(Level.ALL, "Failed to close statement ", e);
+            }
         }
 
         return 1;
