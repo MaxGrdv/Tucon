@@ -1,48 +1,50 @@
 package server;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 
 public class Messages implements Serializable {
 
     private String sender;
     private String message;
-    private long time;
+    private final Timestamp time;
 
     /**
      * @param sender  who send the  message
      * @param message content of message
-     * @param time    representing moment, when the message's been sent
      */
-    public Messages(long time, String sender, String message) {
-
-        if (StringUtils.isEmpty(message)) {
-            throw new IllegalArgumentException("Message is empty!");
-        }
-        if (time <= 0) {
-            throw new IllegalArgumentException("Time is not correct!");
-        }
-        if (StringUtils.isEmpty(sender)) {
-            throw new IllegalArgumentException("Sender is empty!");
-
-        }
+    public Messages(String sender, String message) {
 
         this.sender = sender;
         this.message = message;
-        this.time = time;
+        this.time = new Timestamp(System.currentTimeMillis());
     }
 
+    /**
+     * Gets who sent the message
+     *
+     * @return sender
+     */
     public String getSender() {
         return sender;
     }
 
+    /**
+     * Gets message's text
+     *
+     * @return message
+     */
     public String getMessage() {
         return message;
     }
 
-    public long getTime() {
+    /**
+     * representing time when the message's been sent
+     *
+     * @return time
+     */
+    public Timestamp getTime() {
         return time;
     }
 

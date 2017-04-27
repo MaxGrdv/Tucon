@@ -71,6 +71,7 @@ public class Server extends AbstractServer implements ServerPerformance {
      * @param login    login of user
      * @param password password of user
      * @param register checking choice between registration and authorisation
+     * @param client   remote object
      * @return true, if check-in was successful
      */
     @Override
