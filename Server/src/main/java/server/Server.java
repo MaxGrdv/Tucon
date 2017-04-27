@@ -1,21 +1,21 @@
 package server;
 
 import database.Database;
-import org.apache.commons.lang3.StringUtils;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
+import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
 
 public class Server extends AbstractServer implements ServerPerformance {
-
+    private HashMap<String, ClientInt> clients;
     public Server() throws RemoteException {
         super(6666);
     }
@@ -30,21 +30,8 @@ public class Server extends AbstractServer implements ServerPerformance {
      * @return list of messages
      */
     @Override
-    public List<Messages> getMessages(String message, String sender, String recipient, long time) throws RemoteException {
+    public List<Messages> getMessages(String message, String sender, String recipient, Timestamp time) throws RemoteException {
 
-        if (StringUtils.isEmpty(message)) {
-            throw new IllegalArgumentException("Message is empty!");
-        }
-        if (time <= 0) {
-            throw new IllegalArgumentException("Time is not correct!");
-        }
-        if (StringUtils.isEmpty(sender)) {
-            throw new IllegalArgumentException("Sender is empty!");
-
-        }
-        if (StringUtils.isEmpty(recipient)) {
-            throw new IllegalArgumentException("Recipient is empty!");
-        }
         List<Messages> messages;
         messages = Database.getInstance().getMessages(creatingNewDialog(), time);
         return messages;
@@ -60,13 +47,9 @@ public class Server extends AbstractServer implements ServerPerformance {
      * @return true, if the message was sent successfully
      */
     @Override
-    public boolean sendMessage(String message, String sender, String recipient, long time) throws RemoteException {
+    public boolean sendMessage(String message, String sender, String recipient, Timestamp time) throws RemoteException {
 
-        if (StringUtils.isEmpty(recipient)) {
-            throw new IllegalArgumentException("Recipient is empty!");
-        }
-
-        Database.getInstance().addNewMessage(creatingNewDialog(), new Messages(time, sender, message));
+        Database.getInstance().addNewMessage(creatingNewDialog(), new Messages(sender, message));
 
         return true;
     }
@@ -87,26 +70,19 @@ public class Server extends AbstractServer implements ServerPerformance {
      *
      * @param login    login of user
      * @param password password of user
+     * @param register checking choice between registration and authorisation
      * @return true, if check-in was successful
      */
     @Override
-    public boolean authorization(String login, UUID password, ClientInt newClient) throws RemoteException {
+    public boolean authorization(String login, UUID password, boolean register, ClientInt client) throws RemoteException {
 
-        int authorize = Database.getInstance().authorizeUser(new Authentication(login, password));
-        boolean register = false;
-        if (authorize == 1) {
-            register = true;
-        } else if (authorize == 0) {
-            ArrayList<ClientInt> clients = new ArrayList<ClientInt>();
-            clients.add(newClient);
-            Database.getInstance().addNewUser(new Authentication(login, password), clients);
-            register = false;
-        } else if (authorize == 2) {
-            throw new IllegalArgumentException("User is in database and his password is wrong");
-        } else if (authorize == -1)
-            throw new IllegalArgumentException("Something gone wrong");
-
-        return register;
+        if (register) {
+            Database.getInstance().authorizeUser(new Authentication(login, password));
+        } else {
+            Database.getInstance().addNewUser(new Authentication(login, password));
+            this.clients.put(login, client);
+        }
+        return true;
     }
 
 
